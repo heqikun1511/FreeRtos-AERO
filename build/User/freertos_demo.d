@@ -53,14 +53,15 @@ build/User/freertos_demo.o: User/freertos_demo.c User/freertos_demo.h \
  Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pcd_ex.h \
  Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_hcd.h \
  Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_mmc.h \
- Drivers/./BSP/LED/led.h Drivers/./BSP/LCD/lcd.h User/./FreeRTOSConfig.h \
- Drivers/BSP/KEY/key.h Middlewares/FreeRTOS/include/FreeRTOS.h \
- User/FreeRTOSConfig.h Middlewares/FreeRTOS/include/projdefs.h \
+ Drivers/./BSP/LED/led.h Drivers/./BSP/LCD/lcd.h Drivers/./BSP/KEY/key.h \
+ Middlewares/FreeRTOS/include/FreeRTOS.h User/FreeRTOSConfig.h \
+ Middlewares/FreeRTOS/include/projdefs.h \
  Middlewares/FreeRTOS/include/portable.h \
  Middlewares/FreeRTOS/include/deprecated_definitions.h \
  Middlewares/FreeRTOS/portable/GCC/ARM_CM3/portmacro.h \
  Middlewares/FreeRTOS/include/mpu_wrappers.h \
- Middlewares/FreeRTOS/include/task.h Middlewares/FreeRTOS/include/list.h
+ Middlewares/FreeRTOS/include/task.h Middlewares/FreeRTOS/include/list.h \
+ User/FreeRTOSConfig.h
 User/freertos_demo.h:
 Drivers/./SYSTEM/usart/usart.h:
 Drivers/./SYSTEM/sys/sys.h:
@@ -121,8 +122,7 @@ Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_hcd.h:
 Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_mmc.h:
 Drivers/./BSP/LED/led.h:
 Drivers/./BSP/LCD/lcd.h:
-User/./FreeRTOSConfig.h:
-Drivers/BSP/KEY/key.h:
+Drivers/./BSP/KEY/key.h:
 Middlewares/FreeRTOS/include/FreeRTOS.h:
 User/FreeRTOSConfig.h:
 Middlewares/FreeRTOS/include/projdefs.h:
@@ -132,3 +132,4 @@ Middlewares/FreeRTOS/portable/GCC/ARM_CM3/portmacro.h:
 Middlewares/FreeRTOS/include/mpu_wrappers.h:
 Middlewares/FreeRTOS/include/task.h:
 Middlewares/FreeRTOS/include/list.h:
+User/FreeRTOSConfig.h:
