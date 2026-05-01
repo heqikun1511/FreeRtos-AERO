@@ -1,1 +1,0 @@
-build/startup_stm32f103xe_gcc.o: startup_stm32f103xe_gcc.s
