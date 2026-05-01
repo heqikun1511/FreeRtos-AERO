@@ -15,15 +15,18 @@ MCU = $(CPU) $(FPU) $(FLOAT_ABI)
 
 DEFS = -DUSE_HAL_DRIVER -DSTM32F103xE
 
-INCLUDES = \
-  -IDrivers/CMSIS/Device/ST/STM32F1xx/Include \
-  -IDrivers/STM32F1xx_HAL_Driver/Inc \
-  -IDrivers/CMSIS/Include \
-  -IDrivers \
-  -IUser \
-  -IMiddlewares \
-  -IMiddlewares/FreeRTOS/include \
-  -IMiddlewares/FreeRTOS/portable/GCC/ARM_CM3
+INCLUDE_DIRS = \
+  User \
+  Drivers \
+  Drivers/CMSIS/Include \
+  Drivers/CMSIS/Device/ST/STM32F1xx/Include \
+  Drivers/STM32F1xx_HAL_Driver/Inc \
+  Drivers/STM32F1xx_HAL_Driver/Inc/Legacy \
+  Middlewares \
+  Middlewares/FreeRTOS/include \
+  Middlewares/FreeRTOS/portable/GCC/ARM_CM3
+
+INCLUDES = $(addprefix -I,$(INCLUDE_DIRS))
 
 C_SOURCES = \
   User/main.c \

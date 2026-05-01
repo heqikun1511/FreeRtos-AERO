@@ -1,0 +1,44 @@
+{
+  "configurations": [
+    {
+      "name": "STM32F103 FreeRTOS",
+      "compilerPath": "/usr/bin/arm-none-eabi-gcc",
+      "intelliSenseMode": "gcc-arm",
+      "cStandard": "c11",
+      "defines": [
+        "USE_HAL_DRIVER",
+        "STM32F103xE"
+      ],
+      "compilerArgs": [
+        "-mcpu=cortex-m3",
+        "-mthumb"
+      ],
+      "includePath": [
+        "${workspaceFolder}/User",
+        "${workspaceFolder}/Drivers",
+        "${workspaceFolder}/Drivers/CMSIS/Include",
+        "${workspaceFolder}/Drivers/CMSIS/Device/ST/STM32F1xx/Include",
+        "${workspaceFolder}/Drivers/STM32F1xx_HAL_Driver/Inc",
+        "${workspaceFolder}/Drivers/STM32F1xx_HAL_Driver/Inc/Legacy",
+        "${workspaceFolder}/Middlewares",
+        "${workspaceFolder}/Middlewares/FreeRTOS/include",
+        "${workspaceFolder}/Middlewares/FreeRTOS/portable/GCC/ARM_CM3"
+      ],
+      "browse": {
+        "path": [
+          "${workspaceFolder}/User",
+          "${workspaceFolder}/Drivers",
+          "${workspaceFolder}/Drivers/CMSIS/Include",
+          "${workspaceFolder}/Drivers/CMSIS/Device/ST/STM32F1xx/Include",
+          "${workspaceFolder}/Drivers/STM32F1xx_HAL_Driver/Inc",
+          "${workspaceFolder}/Drivers/STM32F1xx_HAL_Driver/Inc/Legacy",
+          "${workspaceFolder}/Middlewares",
+          "${workspaceFolder}/Middlewares/FreeRTOS/include",
+          "${workspaceFolder}/Middlewares/FreeRTOS/portable/GCC/ARM_CM3"
+        ],
+        "limitSymbolsToIncludedHeaders": true
+      }
+    }
+  ],
+  "version": 4
+}
