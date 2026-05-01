@@ -1,1 +1,9 @@
-build/*
+build/
+Output/
+
+*.o
+*.d
+*.elf
+*.hex
+*.bin
+*.map

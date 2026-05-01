@@ -35,6 +35,7 @@ int main(void)
     sys_stm32_clock_init(RCC_PLL_MUL9); /* 设置时钟, 72Mhz */
     delay_init(72);                     /* 延时初始化 */
     usart_init(115200);                 /* 串口初始化为115200 */
+    printf("USART OK\r\n");
     led_init();                         /* 初始化LED */
     lcd_init();                         /* 初始化LCD */
     key_init();                         /* 初始化按键 */
