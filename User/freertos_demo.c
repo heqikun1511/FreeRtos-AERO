@@ -4,6 +4,8 @@
 #include "./SYSTEM/usart/usart.h"
 #include "./BSP/LED/led.h"
 #include "./BSP/LCD/lcd.h"
+#include "./FreeRTOSConfig.h"
+#include "BSP/KEY/key.h"
 /*FreeRTOS*********************************************************************************************/
 #include "FreeRTOS.h"
 #include "task.h"
@@ -35,6 +37,14 @@ void task1(void *pvParameters);             /* 任务函数 */
 TaskHandle_t            Task2Task_Handler;  /* 任务句柄 */
 void task2(void *pvParameters);             /* 任务函数 */
 
+/* TASK3 任务 配置
+ * 包括: 任务句柄 任务优先级 堆栈大小 创建任务
+ */
+#define TASK3_PRIO      4                   /* 任务优先级 */
+#define TASK3_STK_SIZE  128                 /* 任务堆栈大小 */
+TaskHandle_t            Task3Task_Handler;  /* 任务句柄 */
+void task3(void *pvParameters);             /* 任务函数 */
+
 /******************************************************************************************************/
 
 /**
@@ -48,6 +58,7 @@ void freertos_demo(void)
     lcd_show_string(10, 47, 220, 24, 24, "LED Blink Demo", RED);
     lcd_show_string(10, 76, 220, 16, 16, "LED0: 500ms", BLUE);
     lcd_show_string(10, 96, 220, 16, 16, "LED1: 200ms", BLUE);
+    lcd_show_string(10, 116, 220, 16, 16, "KEY0: Delete Task1", BLUE);
     
     xTaskCreate((TaskFunction_t )start_task,            /* 任务函数 */
                 (const char*    )"start_task",          /* 任务名称 */
@@ -55,7 +66,7 @@ void freertos_demo(void)
                 (void*          )NULL,                  /* 传入给任务函数的参数 */
                 (UBaseType_t    )START_TASK_PRIO,       /* 任务优先级 */
                 (TaskHandle_t*  )&StartTask_Handler);   /* 任务句柄 */
-    vTaskStartScheduler();
+    vTaskStartScheduler();//开启任务调度器，开始执行任务
 }
 
 /**
@@ -65,7 +76,7 @@ void freertos_demo(void)
  */
 void start_task(void *pvParameters)
 {
-    taskENTER_CRITICAL();           /* 进入临界区 */
+    taskENTER_CRITICAL();           /* 进入临界区,作用是保护临界资源 ，暂停任务 */
     /* 创建任务1 */
     xTaskCreate((TaskFunction_t )task1,
                 (const char*    )"task1",
@@ -80,8 +91,14 @@ void start_task(void *pvParameters)
                 (void*          )NULL,
                 (UBaseType_t    )TASK2_PRIO,
                 (TaskHandle_t*  )&Task2Task_Handler);
+    xTaskCreate((TaskFunction_t )task3,
+                (const char*    )"task3",
+                (uint16_t       )TASK3_STK_SIZE,
+                (void*          )NULL,
+                (UBaseType_t    )TASK3_PRIO,
+                (TaskHandle_t*  )&Task3Task_Handler);
     vTaskDelete(StartTask_Handler); /* 删除开始任务 */
-    taskEXIT_CRITICAL();            /* 退出临界区 */
+    taskEXIT_CRITICAL();            /* 退出临界区，恢复任务 */
 }
 
 /**
@@ -113,5 +130,19 @@ void task2(void *pvParameters)
     {
         LED1_TOGGLE();                          /* LED1每200ms翻转一次 */
         vTaskDelay(pdMS_TO_TICKS(200));
+    }
+}
+//判断KEY是否按下，按下则删除任务
+void task3(void *pvParameters)
+{   uint8_t key=0;
+    (void)pvParameters;
+    
+    while(1)
+    {
+        key=key_scan(0);
+        if(key==KEY1_PRES){
+            vTaskDelete(Task1Task_Handler);
+        }
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
