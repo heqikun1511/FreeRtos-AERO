@@ -55,7 +55,7 @@ build/User/main.o: User/main.c Drivers/./SYSTEM/sys/sys.h \
  Drivers/./SYSTEM/usart/usart.h Drivers/./SYSTEM/delay/delay.h \
  Drivers/./BSP/LED/led.h Drivers/./BSP/LCD/lcd.h Drivers/./BSP/KEY/key.h \
  Drivers/./BSP/SRAM/sram.h Middlewares/./MALLOC/malloc.h \
- User/freertos_demo.h
+ User/freertos_demo.h Drivers/./BSP/TIMER/btim.h
 Drivers/./SYSTEM/sys/sys.h:
 Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h:
 Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f103xe.h:
@@ -120,3 +120,4 @@ Drivers/./BSP/KEY/key.h:
 Drivers/./BSP/SRAM/sram.h:
 Middlewares/./MALLOC/malloc.h:
 User/freertos_demo.h:
+Drivers/./BSP/TIMER/btim.h:

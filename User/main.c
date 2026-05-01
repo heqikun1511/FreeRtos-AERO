@@ -27,6 +27,7 @@
 #include "./BSP/SRAM/sram.h"
 #include "./MALLOC/malloc.h"
 #include "freertos_demo.h"
+#include "./BSP/TIMER/btim.h"
 
 int main(void)
 {
@@ -40,6 +41,8 @@ int main(void)
     sram_init();                        /* SRAM初始化 */
     my_mem_init(SRAMIN);                /* 初始化内部SRAM内存池 */
     my_mem_init(SRAMEX);                /* 初始化外部SRAM内存池 */
+    btim_tim7_int_init(1000-1, 7200-1); /* 基本定时器TIM7 1ms中断 */
+    btim_tim6_int_init(1000-1, 7200-1); /* 基本定时器TIM6 1ms中断 */
     
     freertos_demo();                    /* 运行FreeRTOS例程 */
 }

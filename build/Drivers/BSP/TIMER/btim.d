@@ -53,7 +53,7 @@ build/Drivers/BSP/TIMER/btim.o: Drivers/BSP/TIMER/btim.c \
  Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pcd_ex.h \
  Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_hcd.h \
  Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_mmc.h \
- Drivers/./BSP/TIMER/btim.h
+ Drivers/./BSP/TIMER/btim.h Drivers/./SYSTEM/usart/usart.h
 Drivers/./BSP/LED/led.h:
 Drivers/./SYSTEM/sys/sys.h:
 Drivers/CMSIS/Device/ST/STM32F1xx/Include/stm32f1xx.h:
@@ -112,3 +112,4 @@ Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_pcd_ex.h:
 Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_hcd.h:
 Drivers/STM32F1xx_HAL_Driver/Inc/stm32f1xx_hal_mmc.h:
 Drivers/./BSP/TIMER/btim.h:
+Drivers/./SYSTEM/usart/usart.h:
