@@ -59,11 +59,11 @@ void task2(void *pvParameters);             /* 任务函数 */
 /******************************************************************************************************/
     
 
- QueueHandle_t semphore_handle;      /* 信号量句柄 */
+ QueueHandle_t count_semphore_handle;      /* 信号量句柄 */
 void freertos_demo(void)
 {
-    semphore_handle=xSemaphoreCreateBinary();
-    if(semphore_handle!=NULL){
+    count_semphore_handle=xSemaphoreCreateCounting(100,0);//创建一个计数信号量，最大计数值为100，初始计数值为0
+    if(count_semphore_handle!=NULL){
         printf("success!\r\n");
     }
     else{
@@ -136,7 +136,7 @@ void task1(void *pvParameters)
 {
     (void)pvParameters;
     uint8_t key_num=0;
-    BaseType_t err;
+    
     // vListInitialise(&TestList);                 
     // vListInitialiseItem(&ListItem1);            
     // vListInitialiseItem(&ListItem2);            
@@ -146,14 +146,9 @@ void task1(void *pvParameters)
     {
         key_num=key_scan(0);
         if(key_num==KEY0_PRES){
-            if(semphore_handle!=NULL){
-                err=xSemaphoreGive(semphore_handle);
-                if(err==pdPASS){
-                    printf("task1 give semphore success!\r\n");
-                }
-                else{
-                    printf("task1 give semphore fail!\r\n");
-                }
+            if(count_semphore_handle!=NULL){
+                xSemaphoreGive(count_semphore_handle);//释放信号量
+                
 
             }
         }
@@ -186,11 +181,14 @@ void task1(void *pvParameters)
 void task2(void *pvParameters)
 {
     
-    
+    BaseType_t err;
     while(1)
     {
-        xSemaphoreTake(semphore_handle, portMAX_DELAY);//等待信号量，直到获取到为止
-        printf("task2 take semphore success!\r\n");
+        xSemaphoreTake(count_semphore_handle, portMAX_DELAY);//等待信号量，直到获取到为止
+        if(err==pdTRUE){
+            printf("the value is%d!\r\n",(int)uxSemaphoreGetCount(count_semphore_handle));
+        }
+        vTaskDelay(1000);
    
 
 
