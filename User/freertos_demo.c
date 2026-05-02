@@ -8,6 +8,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "queue.h"
+#include "semphr.h"
 #include "FreeRTOSConfig.h"
 
 
@@ -48,33 +49,40 @@ void task2(void *pvParameters);             /* 任务函数 */
 /* TASK3 任务 配置
  * 包括: 任务句柄 任务优先级 堆栈大小 创建任务
  */
-#define TASK3_PRIO      4                   /* 任务优先级 */
-#define TASK3_STK_SIZE  128                 /* 任务堆栈大小 */
- TaskHandle_t            Task3Task_Handler;  /* 任务句柄 */
- void task3(void *pvParameters);             /* 任务函数 */
+// #define TASK3_PRIO      4                   /* 任务优先级 */
+// #define TASK3_STK_SIZE  128                 /* 任务堆栈大小 */
+//  TaskHandle_t            Task3Task_Handler;  /* 任务句柄 */
+//  void task3(void *pvParameters);             /* 任务函数 */
  QueueHandle_t   key_queue;      /* 队列句柄 */
  QueueHandle_t   big_data;
  char buff[100]={"大数组drthdydutduryfuyt"};
 /******************************************************************************************************/
     
 
- 
+ QueueHandle_t semphore_handle;      /* 信号量句柄 */
 void freertos_demo(void)
 {
-    key_queue=xQueueCreate(2, sizeof(uint8_t));
-    if(key_queue!=NULL){
-        printf("key_queue success！\r\n");
+    semphore_handle=xSemaphoreCreateBinary();
+    if(semphore_handle!=NULL){
+        printf("success!\r\n");
     }
     else{
-        printf("key_queue创建失败！\r\n");
+        printf("fail!\r\n");
     }
-     big_data=xQueueCreate(1, sizeof(char*));
-    if(big_data!=NULL){
-        printf("big_data sucess！\r\n");
-    }
-    else{
-        printf("big_data创建失败！\r\n");
-    }
+    // key_queue=xQueueCreate(2, sizeof(uint8_t));
+    // if(key_queue!=NULL){
+    //     printf("key_queue success！\r\n");
+    // }
+    // else{
+    //     printf("key_queue创建失败！\r\n");
+    // }
+    //  big_data=xQueueCreate(1, sizeof(char*));
+    // if(big_data!=NULL){
+    //     printf("big_data sucess！\r\n");
+    // }
+    // else{
+    //     printf("big_data创建失败！\r\n");
+    // }
     lcd_show_string(10, 10, 220, 32, 32, "FreeRTOS", RED);
     lcd_show_string(10, 47, 220, 24, 24, "LED Blink Demo", RED);
     lcd_show_string(10, 76, 220, 16, 16, "LED0: 500ms", BLUE);
@@ -111,35 +119,44 @@ void start_task(void *pvParameters)
                 (void*          )NULL,
                 (UBaseType_t    )TASK2_PRIO,
                 (TaskHandle_t*  )&Task2Task_Handler);
-    xTaskCreate((TaskFunction_t )task3,
-                (const char*    )"task3",
-                (uint16_t       )TASK3_STK_SIZE,
-                (void*          )NULL,
-                (UBaseType_t    )TASK3_PRIO,
-                (TaskHandle_t*  )&Task3Task_Handler);
+    // xTaskCreate((TaskFunction_t )task3,
+    //             (const char*    )"task3",
+    //             (uint16_t       )TASK3_STK_SIZE,
+    //             (void*          )NULL,
+    //             (UBaseType_t    )TASK3_PRIO,
+    //             (TaskHandle_t*  )&Task3Task_Handler);
 
-    vTaskDelete(StartTask_Handler); /* 删除开始任务 */
     taskEXIT_CRITICAL();            /* 退出临界区 */
+    vTaskDelete(NULL);              /* 删除自身，避免任务函数返回 */
 }
 
-/**
- * @brief       task1
- * @param       pvParameters : 传入参数(未用到)
- * @retval      无
- */
+/**释放信号量*/
+ 
 void task1(void *pvParameters)
 {
     (void)pvParameters;
+    uint8_t key_num=0;
+    BaseType_t err;
     // vListInitialise(&TestList);                 
     // vListInitialiseItem(&ListItem1);            
     // vListInitialiseItem(&ListItem2);            
     // vListInitialiseItem(&ListItem3);
-    uint8_t key=0;
-    BaseType_t err=0;
-    char*buf=buff;
-    
+   
     while(1)
     {
+        key_num=key_scan(0);
+        if(key_num==KEY0_PRES){
+            if(semphore_handle!=NULL){
+                err=xSemaphoreGive(semphore_handle);
+                if(err==pdPASS){
+                    printf("task1 give semphore success!\r\n");
+                }
+                else{
+                    printf("task1 give semphore fail!\r\n");
+                }
+
+            }
+        }
     // printf("/**************ַ**************/\r\n");
     // printf("\t\t\t\r\n");
     // printf("TestList\t\t0x%p\t\r\n", &TestList);
@@ -153,21 +170,7 @@ void task1(void *pvParameters)
     // taskENTER_CRITICAL(); /* 进入临界区 */
     // printf("Task1 is running! %d\r\n", task1_num++);
     // taskEXIT_CRITICAL();
-    key=key_scan(0);
     
-    if(key==KEY0_PRES||key==KEY1_PRES)
-    {
-        printf("KEY0 is pressed!\r\n");
-        err=xQueueSend(key_queue, &key, portMAX_DELAY);
-        if(err!=pdTRUE){
-        printf("key_queue发送失败！\r\n");
-
-        }
-       
-    }
-    else if(key==WKUP_PRES){
-        xQueueSend(big_data, &buf, portMAX_DELAY);
-    }
 
 
     vTaskDelay(10);
@@ -178,54 +181,30 @@ void task1(void *pvParameters)
     }
 }
 
-/**
- * @brief       task2
- * @param       pvParameters : 传入参数(未用到)
- * @retval      无
- */
+/**获取信号量*/
+ 
 void task2(void *pvParameters)
 {
-    (void)pvParameters;
-    uint8_t key=0;
-    BaseType_t err=0;
+    
     
     while(1)
     {
-    // {   taskENTER_CRITICAL(); /* 进入临界区 */
-    //     printf("Task2 is running! %d\r\n", task2_num++);
-    //     taskEXIT_CRITICAL();
-    //     delay_ms(10);
-    err=xQueueReceive(key_queue,&key, portMAX_DELAY);
-    if(err!=pdTRUE){
-        printf("key_queue读取失败！\r\n");
-
-        }
-        else{
-            printf("data：%d\r\n",key);
-        }
-        
+        xSemaphoreTake(semphore_handle, portMAX_DELAY);//等待信号量，直到获取到为止
+        printf("task2 take semphore success!\r\n");
+   
 
 
     }
 }
-void task3(void *pvParameters)
-{
-    BaseType_t err=0;
-    char*buf=buff;
+//void task3(void *pvParameters)
+// {
     
-    (void)pvParameters;
+    
+//     (void)pvParameters;
 
-    while(1)
-    {
+//     while(1)
+//     {
         
-    err=xQueueReceive(big_data,&buf, portMAX_DELAY);
-    if(err!=pdTRUE){
-        printf("big_data读取失败！\r\n");
-
-        }
-        else{
-            printf("data：%s\r\n",buf);
-        }
-       
-    }
-}
+    
+//     }
+// }
