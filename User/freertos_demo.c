@@ -7,6 +7,7 @@
 /*FreeRTOS*********************************************************************************************/
 #include "FreeRTOS.h"
 #include "task.h"
+#include "queue.h"
 #include "FreeRTOSConfig.h"
 
 
@@ -18,10 +19,10 @@
  List_t                  TestList;           
         
  */
-List_t                  TestList; 
-ListItem_t              ListItem1;          
-ListItem_t              ListItem2;         
-ListItem_t              ListItem3;  
+// List_t                  TestList; 
+// ListItem_t              ListItem1;          
+// ListItem_t              ListItem2;         
+// ListItem_t              ListItem3;  
 
 #define START_TASK_PRIO 1                   /* 任务优先级 */
 #define START_STK_SIZE  128                 /* 任务堆栈大小 */
@@ -39,7 +40,7 @@ void task1(void *pvParameters);             /* 任务函数 */
 /* TASK2 任务 配置
  * 包括: 任务句柄 任务优先级 堆栈大小 创建任务
  */
-#define TASK2_PRIO      2                   /* 任务优先级 */
+#define TASK2_PRIO      3                   /* 任务优先级 */
 #define TASK2_STK_SIZE  128                 /* 任务堆栈大小 */
 TaskHandle_t            Task2Task_Handler;  /* 任务句柄 */
 void task2(void *pvParameters);             /* 任务函数 */
@@ -47,19 +48,33 @@ void task2(void *pvParameters);             /* 任务函数 */
 /* TASK3 任务 配置
  * 包括: 任务句柄 任务优先级 堆栈大小 创建任务
  */
-// #define TASK3_PRIO      4                   /* 任务优先级 */
-// #define TASK3_STK_SIZE  128                 /* 任务堆栈大小 */
-// TaskHandle_t            Task3Task_Handler;  /* 任务句柄 */
-// void task3(void *pvParameters);             /* 任务函数 */
+#define TASK3_PRIO      4                   /* 任务优先级 */
+#define TASK3_STK_SIZE  128                 /* 任务堆栈大小 */
+ TaskHandle_t            Task3Task_Handler;  /* 任务句柄 */
+ void task3(void *pvParameters);             /* 任务函数 */
+ QueueHandle_t   key_queue;      /* 队列句柄 */
+ QueueHandle_t   big_data;
+ char buff[100]={"大数组drthdydutduryfuyt"};
 /******************************************************************************************************/
     
-/**
- * @brief       FreeRTOS例程入口函数
- * @param       无
- * @retval      无
- */
+
+ 
 void freertos_demo(void)
 {
+    key_queue=xQueueCreate(2, sizeof(uint8_t));
+    if(key_queue!=NULL){
+        printf("key_queue success！\r\n");
+    }
+    else{
+        printf("key_queue创建失败！\r\n");
+    }
+     big_data=xQueueCreate(1, sizeof(char*));
+    if(big_data!=NULL){
+        printf("big_data sucess！\r\n");
+    }
+    else{
+        printf("big_data创建失败！\r\n");
+    }
     lcd_show_string(10, 10, 220, 32, 32, "FreeRTOS", RED);
     lcd_show_string(10, 47, 220, 24, 24, "LED Blink Demo", RED);
     lcd_show_string(10, 76, 220, 16, 16, "LED0: 500ms", BLUE);
@@ -96,12 +111,12 @@ void start_task(void *pvParameters)
                 (void*          )NULL,
                 (UBaseType_t    )TASK2_PRIO,
                 (TaskHandle_t*  )&Task2Task_Handler);
-    // xTaskCreate((TaskFunction_t )task3,
-    //             (const char*    )"task3",
-    //             (uint16_t       )TASK3_STK_SIZE,
-    //             (void*          )NULL,
-    //             (UBaseType_t    )TASK3_PRIO,
-    //             (TaskHandle_t*  )&Task3Task_Handler);
+    xTaskCreate((TaskFunction_t )task3,
+                (const char*    )"task3",
+                (uint16_t       )TASK3_STK_SIZE,
+                (void*          )NULL,
+                (UBaseType_t    )TASK3_PRIO,
+                (TaskHandle_t*  )&Task3Task_Handler);
 
     vTaskDelete(StartTask_Handler); /* 删除开始任务 */
     taskEXIT_CRITICAL();            /* 退出临界区 */
@@ -119,8 +134,9 @@ void task1(void *pvParameters)
     // vListInitialiseItem(&ListItem1);            
     // vListInitialiseItem(&ListItem2);            
     // vListInitialiseItem(&ListItem3);
-    uint8_t task1_num=0;
-    
+    uint8_t key=0;
+    BaseType_t err=0;
+    char*buf=buff;
     
     while(1)
     {
@@ -137,8 +153,24 @@ void task1(void *pvParameters)
     // taskENTER_CRITICAL(); /* 进入临界区 */
     // printf("Task1 is running! %d\r\n", task1_num++);
     // taskEXIT_CRITICAL();
-    LED0_TOGGLE();
-    vTaskDelay(500);
+    key=key_scan(0);
+    
+    if(key==KEY0_PRES||key==KEY1_PRES)
+    {
+        printf("KEY0 is pressed!\r\n");
+        err=xQueueSend(key_queue, &key, portMAX_DELAY);
+        if(err!=pdTRUE){
+        printf("key_queue发送失败！\r\n");
+
+        }
+       
+    }
+    else if(key==WKUP_PRES){
+        xQueueSend(big_data, &buf, portMAX_DELAY);
+    }
+
+
+    vTaskDelay(10);
 
 
        
@@ -154,9 +186,8 @@ void task1(void *pvParameters)
 void task2(void *pvParameters)
 {
     (void)pvParameters;
-    UBaseType_t prior_num=0;
-    uxTaskPriorityGet(Task2Task_Handler);
-    printf("Task2 priority: %d\r\n", prior_num);
+    uint8_t key=0;
+    BaseType_t err=0;
     
     while(1)
     {
@@ -164,32 +195,37 @@ void task2(void *pvParameters)
     //     printf("Task2 is running! %d\r\n", task2_num++);
     //     taskEXIT_CRITICAL();
     //     delay_ms(10);
-        vTaskDelay(1000);
+    err=xQueueReceive(key_queue,&key, portMAX_DELAY);
+    if(err!=pdTRUE){
+        printf("key_queue读取失败！\r\n");
+
+        }
+        else{
+            printf("data：%d\r\n",key);
+        }
+        
 
 
     }
 }
-// void task3(void *pvParameters)
-// {
-//     uint8_t key = 0;
-//     (void)pvParameters;
+void task3(void *pvParameters)
+{
+    BaseType_t err=0;
+    char*buf=buff;
+    
+    (void)pvParameters;
 
-//     while(1)
-//     {
-//         key = key_scan(0);
+    while(1)
+    {
+        
+    err=xQueueReceive(big_data,&buf, portMAX_DELAY);
+    if(err!=pdTRUE){
+        printf("big_data读取失败！\r\n");
 
-//         if(key == KEY0_PRES)
-//         {
-//             vTaskSuspend(Task1Task_Handler);
-//             lcd_show_string(10, 116, 220, 16, 16, "LED0: Suspended", BLUE);
-//         }
-
-//         if(key == KEY1_PRES)
-//         {
-//             vTaskResume(Task1Task_Handler);
-//             lcd_show_string(10, 116, 220, 16, 16, "LED0: Resumed  ", BLUE);
-//         }
-
-//         vTaskDelay(pdMS_TO_TICKS(10));
-//     }
-// }
+        }
+        else{
+            printf("data：%s\r\n",buf);
+        }
+       
+    }
+}
