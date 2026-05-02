@@ -134,10 +134,11 @@ void task1(void *pvParameters)
     // printf("ListItem3\t\t0x%p\t\r\n", &ListItem3);
     // printf("/*****************************************************/\r\n");
     // printf("KEY0!\r\n\r\n\r\n");
-    taskENTER_CRITICAL(); /* 进入临界区 */
-    printf("Task1 is running! %d\r\n", task1_num++);
-    taskEXIT_CRITICAL();
-    delay_ms(10);//不会实现任务调度，整个运行大于10ms，运行四五次
+    // taskENTER_CRITICAL(); /* 进入临界区 */
+    // printf("Task1 is running! %d\r\n", task1_num++);
+    // taskEXIT_CRITICAL();
+    LED0_TOGGLE();
+    vTaskDelay(500);
 
 
        
@@ -153,13 +154,18 @@ void task1(void *pvParameters)
 void task2(void *pvParameters)
 {
     (void)pvParameters;
-    uint32_t task2_num=0;
+    UBaseType_t prior_num=0;
+    uxTaskPriorityGet(Task2Task_Handler);
+    printf("Task2 priority: %d\r\n", prior_num);
     
     while(1)
-    {   taskENTER_CRITICAL(); /* 进入临界区 */
-        printf("Task2 is running! %d\r\n", task2_num++);
-        taskEXIT_CRITICAL();
-        delay_ms(10);
+    {
+    // {   taskENTER_CRITICAL(); /* 进入临界区 */
+    //     printf("Task2 is running! %d\r\n", task2_num++);
+    //     taskEXIT_CRITICAL();
+    //     delay_ms(10);
+        vTaskDelay(1000);
+
 
     }
 }
