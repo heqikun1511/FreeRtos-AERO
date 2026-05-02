@@ -25,7 +25,7 @@
 #include "./BSP/SRAM/sram.h"
 #include "./SYSTEM/usart/usart.h"
 
-SRAM_HandleTypeDef g_sram_handler; //SRAM句柄
+SRAM_HandleTypeDef g_sram_handler; // SRAM句柄
 
 /**
  * @brief       初始化 外部SRAM
@@ -47,9 +47,9 @@ void sram_init(void)
     __HAL_RCC_GPIOG_CLK_ENABLE(); /* 使能GPIOG时钟 */
 
     GPIO_Initure.Pin = SRAM_CS_GPIO_PIN;
-    GPIO_Initure.Mode = GPIO_MODE_AF_PP;       
-    GPIO_Initure.Pull = GPIO_PULLUP;           
-    GPIO_Initure.Speed = GPIO_SPEED_FREQ_HIGH; 
+    GPIO_Initure.Mode = GPIO_MODE_AF_PP;
+    GPIO_Initure.Pull = GPIO_PULLUP;
+    GPIO_Initure.Speed = GPIO_SPEED_FREQ_HIGH;
     HAL_GPIO_Init(SRAM_CS_GPIO_PORT, &GPIO_Initure); /* SRAM_CS引脚模式设置 */
 
     GPIO_Initure.Pin = SRAM_WR_GPIO_PIN;
@@ -58,9 +58,8 @@ void sram_init(void)
     GPIO_Initure.Pin = SRAM_RD_GPIO_PIN;
     HAL_GPIO_Init(SRAM_RD_GPIO_PORT, &GPIO_Initure); /* SRAM_CS引脚模式设置 */
 
-    
     /* PD0,1,4,5,8~15 */
-    GPIO_Initure.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_8 | GPIO_PIN_9 | 
+    GPIO_Initure.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_8 | GPIO_PIN_9 |
                        GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12 | GPIO_PIN_13 |
                        GPIO_PIN_14 | GPIO_PIN_15;
     GPIO_Initure.Mode = GPIO_MODE_AF_PP;       /* 推挽复用 */
@@ -68,7 +67,7 @@ void sram_init(void)
     GPIO_Initure.Speed = GPIO_SPEED_FREQ_HIGH; /* 高速 */
     HAL_GPIO_Init(GPIOD, &GPIO_Initure);
 
-    //PE0,1,7~15
+    // PE0,1,7~15
     GPIO_Initure.Pin = GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_7 | GPIO_PIN_8 | GPIO_PIN_9 |
                        GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12 | GPIO_PIN_13 | GPIO_PIN_14 |
                        GPIO_PIN_15;
@@ -86,27 +85,26 @@ void sram_init(void)
     g_sram_handler.Instance = FSMC_NORSRAM_DEVICE;
     g_sram_handler.Extended = FSMC_NORSRAM_EXTENDED_DEVICE;
 
-    g_sram_handler.Init.NSBank = (SRAM_FSMC_NEX == 1) ? FSMC_NORSRAM_BANK1 : \
-                                 (SRAM_FSMC_NEX == 2) ? FSMC_NORSRAM_BANK2 : \
-                                 (SRAM_FSMC_NEX == 3) ? FSMC_NORSRAM_BANK3 : 
-                                                        FSMC_NORSRAM_BANK4; /* 根据配置选择FSMC_NE1~4 */
-    g_sram_handler.Init.DataAddressMux = FSMC_DATA_ADDRESS_MUX_DISABLE;     /* 地址/数据线不复用 */
-    g_sram_handler.Init.MemoryType = FSMC_MEMORY_TYPE_SRAM;                 /* SRAM */
-    g_sram_handler.Init.MemoryDataWidth = FSMC_NORSRAM_MEM_BUS_WIDTH_16;    /* 16位数据宽度 */
-    g_sram_handler.Init.BurstAccessMode = FSMC_BURST_ACCESS_MODE_DISABLE;   /* 是否使能突发访问,仅对同步突发存储器有效,此处未用到 */
-    g_sram_handler.Init.WaitSignalPolarity = FSMC_WAIT_SIGNAL_POLARITY_LOW; /* 等待信号的极性,仅在突发模式访问下有用 */
-    g_sram_handler.Init.WaitSignalActive = FSMC_WAIT_TIMING_BEFORE_WS;      /* 存储器是在等待周期之前的一个时钟周期还是等待周期期间使能NWAIT */
-    g_sram_handler.Init.WriteOperation = FSMC_WRITE_OPERATION_ENABLE;       /* 存储器写使能 */
-    g_sram_handler.Init.WaitSignal = FSMC_WAIT_SIGNAL_DISABLE;              /* 等待使能位,此处未用到 */
-    g_sram_handler.Init.ExtendedMode = FSMC_EXTENDED_MODE_DISABLE;          /* 读写使用相同的时序 */
-    g_sram_handler.Init.AsynchronousWait = FSMC_ASYNCHRONOUS_WAIT_DISABLE;  /* 是否使能同步传输模式下的等待信号,此处未用到 */
-    g_sram_handler.Init.WriteBurst = FSMC_WRITE_BURST_DISABLE;              /* 禁止突发写 */
+    g_sram_handler.Init.NSBank = (SRAM_FSMC_NEX == 1) ? FSMC_NORSRAM_BANK1 : (SRAM_FSMC_NEX == 2) ? FSMC_NORSRAM_BANK2
+                                                                         : (SRAM_FSMC_NEX == 3)   ? FSMC_NORSRAM_BANK3
+                                                                                                  : FSMC_NORSRAM_BANK4; /* 根据配置选择FSMC_NE1~4 */
+    g_sram_handler.Init.DataAddressMux = FSMC_DATA_ADDRESS_MUX_DISABLE;                                                 /* 地址/数据线不复用 */
+    g_sram_handler.Init.MemoryType = FSMC_MEMORY_TYPE_SRAM;                                                             /* SRAM */
+    g_sram_handler.Init.MemoryDataWidth = FSMC_NORSRAM_MEM_BUS_WIDTH_16;                                                /* 16位数据宽度 */
+    g_sram_handler.Init.BurstAccessMode = FSMC_BURST_ACCESS_MODE_DISABLE;                                               /* 是否使能突发访问,仅对同步突发存储器有效,此处未用到 */
+    g_sram_handler.Init.WaitSignalPolarity = FSMC_WAIT_SIGNAL_POLARITY_LOW;                                             /* 等待信号的极性,仅在突发模式访问下有用 */
+    g_sram_handler.Init.WaitSignalActive = FSMC_WAIT_TIMING_BEFORE_WS;                                                  /* 存储器是在等待周期之前的一个时钟周期还是等待周期期间使能NWAIT */
+    g_sram_handler.Init.WriteOperation = FSMC_WRITE_OPERATION_ENABLE;                                                   /* 存储器写使能 */
+    g_sram_handler.Init.WaitSignal = FSMC_WAIT_SIGNAL_DISABLE;                                                          /* 等待使能位,此处未用到 */
+    g_sram_handler.Init.ExtendedMode = FSMC_EXTENDED_MODE_DISABLE;                                                      /* 读写使用相同的时序 */
+    g_sram_handler.Init.AsynchronousWait = FSMC_ASYNCHRONOUS_WAIT_DISABLE;                                              /* 是否使能同步传输模式下的等待信号,此处未用到 */
+    g_sram_handler.Init.WriteBurst = FSMC_WRITE_BURST_DISABLE;                                                          /* 禁止突发写 */
     /* FMC读时序控制寄存器 */
-    fsmc_readwritetim.AddressSetupTime = 0x00;                              /* 地址建立时间（ADDSET）为1个HCLK 1/72M=13.8ns */
-    fsmc_readwritetim.AddressHoldTime = 0x00;                               /* 地址保持时间（ADDHLD）模式A未用到 */
-    fsmc_readwritetim.DataSetupTime = 0x01;                                 /* 数据保存时间为3个HCLK    =4*13.8=55ns */
+    fsmc_readwritetim.AddressSetupTime = 0x00; /* 地址建立时间（ADDSET）为1个HCLK 1/72M=13.8ns */
+    fsmc_readwritetim.AddressHoldTime = 0x00;  /* 地址保持时间（ADDHLD）模式A未用到 */
+    fsmc_readwritetim.DataSetupTime = 0x01;    /* 数据保存时间为3个HCLK    =4*13.8=55ns */
     fsmc_readwritetim.BusTurnAroundDuration = 0X00;
-    fsmc_readwritetim.AccessMode = FSMC_ACCESS_MODE_A;                      /* 模式A */
+    fsmc_readwritetim.AccessMode = FSMC_ACCESS_MODE_A; /* 模式A */
     HAL_SRAM_Init(&g_sram_handler, &fsmc_readwritetim, &fsmc_readwritetim);
 }
 

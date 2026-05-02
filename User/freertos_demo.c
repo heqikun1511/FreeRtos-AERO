@@ -14,7 +14,14 @@
 
 /* START_TASK 任务 配置
  * 包括: 任务句柄 任务优先级 堆栈大小 创建任务
+ List_t                  TestList;           
+        
  */
+List_t                  TestList; 
+ListItem_t              ListItem1;          
+ListItem_t              ListItem2;         
+ListItem_t              ListItem3;  
+
 #define START_TASK_PRIO 1                   /* 任务优先级 */
 #define START_STK_SIZE  128                 /* 任务堆栈大小 */
 TaskHandle_t            StartTask_Handler;  /* 任务句柄 */
@@ -39,12 +46,12 @@ void task2(void *pvParameters);             /* 任务函数 */
 /* TASK3 任务 配置
  * 包括: 任务句柄 任务优先级 堆栈大小 创建任务
  */
-#define TASK3_PRIO      4                   /* 任务优先级 */
-#define TASK3_STK_SIZE  128                 /* 任务堆栈大小 */
-TaskHandle_t            Task3Task_Handler;  /* 任务句柄 */
-void task3(void *pvParameters);             /* 任务函数 */
+// #define TASK3_PRIO      4                   /* 任务优先级 */
+// #define TASK3_STK_SIZE  128                 /* 任务堆栈大小 */
+// TaskHandle_t            Task3Task_Handler;  /* 任务句柄 */
+// void task3(void *pvParameters);             /* 任务函数 */
 /******************************************************************************************************/
-
+    
 /**
  * @brief       FreeRTOS例程入口函数
  * @param       无
@@ -55,7 +62,7 @@ void freertos_demo(void)
     lcd_show_string(10, 10, 220, 32, 32, "FreeRTOS", RED);
     lcd_show_string(10, 47, 220, 24, 24, "LED Blink Demo", RED);
     lcd_show_string(10, 76, 220, 16, 16, "LED0: 500ms", BLUE);
-    lcd_show_string(10, 96, 220, 16, 16, "LED1: 200ms", BLUE);
+    //lcd_show_string(10, 96, 220, 16, 16, "LED1: 200ms", BLUE);
     
     xTaskCreate((TaskFunction_t )start_task,            /* 任务函数 */
                 (const char*    )"start_task",          /* 任务名称 */
@@ -88,12 +95,12 @@ void start_task(void *pvParameters)
                 (void*          )NULL,
                 (UBaseType_t    )TASK2_PRIO,
                 (TaskHandle_t*  )&Task2Task_Handler);
-    xTaskCreate((TaskFunction_t )task3,
-                (const char*    )"task3",
-                (uint16_t       )TASK3_STK_SIZE,
-                (void*          )NULL,
-                (UBaseType_t    )TASK3_PRIO,
-                (TaskHandle_t*  )&Task3Task_Handler);
+    // xTaskCreate((TaskFunction_t )task3,
+    //             (const char*    )"task3",
+    //             (uint16_t       )TASK3_STK_SIZE,
+    //             (void*          )NULL,
+    //             (UBaseType_t    )TASK3_PRIO,
+    //             (TaskHandle_t*  )&Task3Task_Handler);
 
     vTaskDelete(StartTask_Handler); /* 删除开始任务 */
     taskEXIT_CRITICAL();            /* 退出临界区 */
@@ -107,11 +114,30 @@ void start_task(void *pvParameters)
 void task1(void *pvParameters)
 {
     (void)pvParameters;
+    vListInitialise(&TestList);                 
+    vListInitialiseItem(&ListItem1);            
+    vListInitialiseItem(&ListItem2);            
+    vListInitialiseItem(&ListItem3);
+    uint8_t task1_num;
+    
     
     while(1)
     {
-        LED0_TOGGLE();                          /* LED0每500ms翻转一次 */
-        vTaskDelay(pdMS_TO_TICKS(500));
+    printf("/**************ַ**************/\r\n");
+    printf("\t\t\t\r\n");
+    printf("TestList\t\t0x%p\t\r\n", &TestList);
+    printf("TestList->pxIndex\t0x%p\t\r\n", TestList.pxIndex);
+    printf("TestList->xListEnd\t0x%p\t\r\n", (&TestList.xListEnd));
+    printf("ListItem1\t\t0x%p\t\r\n", &ListItem1);
+    printf("ListItem2\t\t0x%p\t\r\n", &ListItem2);
+    printf("ListItem3\t\t0x%p\t\r\n", &ListItem3);
+    printf("/*****************************************************/\r\n");
+    printf("KEY0!\r\n\r\n\r\n");
+       
+
+
+       
+
     }
 }
 
@@ -125,32 +151,32 @@ void task2(void *pvParameters)
     (void)pvParameters;
     
     while(1)
-    {
-        LED1_TOGGLE();                          /* LED1每200ms翻转一次 */
-        vTaskDelay(pdMS_TO_TICKS(200));
+    {printf(1111);
+        vTaskDelay(500);
+
     }
 }
-void task3(void *pvParameters)
-{
-    uint8_t key = 0;
-    (void)pvParameters;
+// void task3(void *pvParameters)
+// {
+//     uint8_t key = 0;
+//     (void)pvParameters;
 
-    while(1)
-    {
-        key = key_scan(0);
+//     while(1)
+//     {
+//         key = key_scan(0);
 
-        if(key == KEY0_PRES)
-        {
-            vTaskSuspend(Task1Task_Handler);
-            lcd_show_string(10, 116, 220, 16, 16, "LED0: Suspended", BLUE);
-        }
+//         if(key == KEY0_PRES)
+//         {
+//             vTaskSuspend(Task1Task_Handler);
+//             lcd_show_string(10, 116, 220, 16, 16, "LED0: Suspended", BLUE);
+//         }
 
-        if(key == KEY1_PRES)
-        {
-            vTaskResume(Task1Task_Handler);
-            lcd_show_string(10, 116, 220, 16, 16, "LED0: Resumed  ", BLUE);
-        }
+//         if(key == KEY1_PRES)
+//         {
+//             vTaskResume(Task1Task_Handler);
+//             lcd_show_string(10, 116, 220, 16, 16, "LED0: Resumed  ", BLUE);
+//         }
 
-        vTaskDelay(pdMS_TO_TICKS(10));
-    }
-}
+//         vTaskDelay(pdMS_TO_TICKS(10));
+//     }
+// }
