@@ -10,8 +10,9 @@
 #include "queue.h"
 #include "FreeRTOSConfig.h"
 #include "semphr.h"
+#include "event_groups.h"
 
-
+EventGroupHandle_t event_group_handler; /* 事件组句柄 */
 /******************************************************************************************************/
 /*FreeRTOS配置*/
 
@@ -64,20 +65,7 @@ QueueHandle_t   semp_handler; /* 队列2句柄 */
  
 void freertos_demo(void)
 {
-    key_queue=xQueueCreate(2, sizeof(uint8_t));
-    if(key_queue!=NULL){
-        printf("key_queue success！\r\n");
-    }
-    else{
-        printf("key_queue创建失败！\r\n");
-    }
-     big_data=xQueueCreate(1, sizeof(char*));
-    if(big_data!=NULL){
-        printf("big_data sucess！\r\n");
-    }
-    else{
-        printf("big_data创建失败！\r\n");
-    }
+    
     lcd_show_string(10, 10, 220, 32, 32, "FreeRTOS", RED);
     lcd_show_string(10, 47, 220, 24, 24, "LED Blink Demo", RED);
     lcd_show_string(10, 76, 220, 16, 16, "LED0: 500ms", BLUE);
@@ -100,18 +88,11 @@ void freertos_demo(void)
 void start_task(void *pvParameters)
 {
     taskENTER_CRITICAL();           /* 进入临界区 */
-    queueset_handler= xQueueCreateSet(2); /* 创建一个包含2个成员的队列集 */
-    semp_handler=xSemaphoreCreateBinary();
-    
-        if(queueset_handler!=NULL){
-            printf("queueset_handler success!\r\n");
-        }
-        else{
-            printf("queueset_handler fail!\r\n");
-        }
-        queue1_handler=xQueueCreate(1,sizeof(uint8_t));
-        xQueueAddToSet(queue1_handler, queueset_handler); /* 将队列1添加到队列集中 */
-        xQueueAddToSet(semp_handler, queueset_handler); /* 将信号量添加到队列集中 */
+    event_group_handler=xEventGroupCreate();            /* 创建事件组 */
+    if(event_group_handler!=NULL){
+        printf("event group create success\r\n");
+
+    }
     /* 创建任务1 */
     xTaskCreate((TaskFunction_t )task1,
                 (const char*    )"task1",
@@ -142,34 +123,30 @@ void task1(void *pvParameters)
     (void)pvParameters;
    
     uint8_t key=0;
-    BaseType_t err=0;
-    char*buf=buff;
+   
+    
     
     while(1)
     {
-    
-    key=key_scan(0);
-    
-    if(key==KEY0_PRES)
-    {
-        err=xQueueSend(queue1_handler,&key, portMAX_DELAY);
-        if(err==pdPASS){
-            printf("add success!\r\n");
+        key=key_scan(0);
+        if(key==KEY0_PRES)
+        {
+            printf("KEY0_PRES\r\n");
+            xEventGroupSetBits(event_group_handler,0x01); /* 设置事件组的第0位 */
         }
-        
-       
-    
-    
-    }
-    else if(key==KEY1_PRES){
-            err=xSemaphoreGive(semp_handler);
-            if(err==pdPASS){
-                printf("success release\r\n");
-            }
-            else{
-                printf("fail to release\r\n");
-            }
+        else if(key==KEY1_PRES)
+        {
+            printf("KEY1_PRES\r\n");
+            xEventGroupSetBits(event_group_handler,0x02); /* 设置事件组的第1位 */
         }
+        else if(key==KEY2_PRES)
+        {
+            printf("KEY2_PRES\r\n");
+            xEventGroupSetBits(event_group_handler,0x04); /* 设置事件组的第2位 */
+        }
+        vTaskDelay(10);
+    
+    
 
     vTaskDelay(10);
 
@@ -188,20 +165,12 @@ void task2(void *pvParameters)
 {
     (void)pvParameters;
     uint8_t key=0;
-    BaseType_t err=0;
     QueueSetHandle_t memory_handler;
+    EventBits_t evenbit=0;
     while(1)
     {
-    memory_handler=xQueueSelectFromSet(queueset_handler, portMAX_DELAY); /* 从队列集中选择一个已准备好的成员 */
-    if(memory_handler==queue1_handler){
-        xQueueReceive(queue1_handler, &key, 0); /* 从队列1接收数据 */
-        printf("key: %d\r\n", key);
+        memory_handler=xEventGroupWaitBits(event_group_handler,0x01||0x02||0x04,pdTRUE,pdTRUE,portMAX_DELAY); /* 等待事件组的第0、1、2位任意一个被置位 */
+        printf("the position of the bit is %d\r\n",memory_handler);
     }
-    else if(memory_handler==semp_handler){
-        xSemaphoreTake(semp_handler, 0); /* 从信号量接收数据 */
-        printf("semaphore received\r\n");
-
-    }
-}
 }
 
