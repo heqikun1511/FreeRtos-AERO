@@ -3,6 +3,7 @@
 #include "./BSP/LED/led.h"
 #include "./BSP/LCD/lcd.h"
 #include "./BSP/KEY/key.h"
+#include "./SYSTEM/delay/delay.h"`
 /*FreeRTOS*********************************************************************************************/
 #include "FreeRTOS.h"
 #include "task.h"
@@ -38,7 +39,7 @@ void task1(void *pvParameters);             /* 任务函数 */
 /* TASK2 任务 配置
  * 包括: 任务句柄 任务优先级 堆栈大小 创建任务
  */
-#define TASK2_PRIO      3                   /* 任务优先级 */
+#define TASK2_PRIO      2                   /* 任务优先级 */
 #define TASK2_STK_SIZE  128                 /* 任务堆栈大小 */
 TaskHandle_t            Task2Task_Handler;  /* 任务句柄 */
 void task2(void *pvParameters);             /* 任务函数 */
@@ -114,26 +115,29 @@ void start_task(void *pvParameters)
 void task1(void *pvParameters)
 {
     (void)pvParameters;
-    vListInitialise(&TestList);                 
-    vListInitialiseItem(&ListItem1);            
-    vListInitialiseItem(&ListItem2);            
-    vListInitialiseItem(&ListItem3);
-    uint8_t task1_num;
+    // vListInitialise(&TestList);                 
+    // vListInitialiseItem(&ListItem1);            
+    // vListInitialiseItem(&ListItem2);            
+    // vListInitialiseItem(&ListItem3);
+    uint8_t task1_num=0;
     
     
     while(1)
     {
-    printf("/**************ַ**************/\r\n");
-    printf("\t\t\t\r\n");
-    printf("TestList\t\t0x%p\t\r\n", &TestList);
-    printf("TestList->pxIndex\t0x%p\t\r\n", TestList.pxIndex);
-    printf("TestList->xListEnd\t0x%p\t\r\n", (&TestList.xListEnd));
-    printf("ListItem1\t\t0x%p\t\r\n", &ListItem1);
-    printf("ListItem2\t\t0x%p\t\r\n", &ListItem2);
-    printf("ListItem3\t\t0x%p\t\r\n", &ListItem3);
-    printf("/*****************************************************/\r\n");
-    printf("KEY0!\r\n\r\n\r\n");
-       
+    // printf("/**************ַ**************/\r\n");
+    // printf("\t\t\t\r\n");
+    // printf("TestList\t\t0x%p\t\r\n", &TestList);
+    // printf("TestList->pxIndex\t0x%p\t\r\n", TestList.pxIndex);
+    // printf("TestList->xListEnd\t0x%p\t\r\n", (&TestList.xListEnd));
+    // printf("ListItem1\t\t0x%p\t\r\n", &ListItem1);
+    // printf("ListItem2\t\t0x%p\t\r\n", &ListItem2);
+    // printf("ListItem3\t\t0x%p\t\r\n", &ListItem3);
+    // printf("/*****************************************************/\r\n");
+    // printf("KEY0!\r\n\r\n\r\n");
+    taskENTER_CRITICAL(); /* 进入临界区 */
+    printf("Task1 is running! %d\r\n", task1_num++);
+    taskEXIT_CRITICAL();
+    delay_ms(10);//不会实现任务调度，整个运行大于10ms，运行四五次
 
 
        
@@ -149,10 +153,13 @@ void task1(void *pvParameters)
 void task2(void *pvParameters)
 {
     (void)pvParameters;
+    uint32_t task2_num=0;
     
     while(1)
-    {printf(1111);
-        vTaskDelay(500);
+    {   taskENTER_CRITICAL(); /* 进入临界区 */
+        printf("Task2 is running! %d\r\n", task2_num++);
+        taskEXIT_CRITICAL();
+        delay_ms(10);
 
     }
 }
