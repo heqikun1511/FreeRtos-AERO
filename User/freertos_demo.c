@@ -35,40 +35,42 @@ void start_task(void *pvParameters);        /* 任务函数 */
  */
 #define TASK1_PRIO      2                   /* 任务优先级 */
 #define TASK1_STK_SIZE  128                 /* 任务堆栈大小 */
-TaskHandle_t            Task1Task_Handler;  /* 任务句柄 */
-void task1(void *pvParameters);             /* 任务函数 */
+TaskHandle_t            lowTask_Handler;  /* 任务句柄 */
+void lowtask(void *pvParameters);             /* 任务函数 */
 
 /* TASK2 任务 配置
  * 包括: 任务句柄 任务优先级 堆栈大小 创建任务
  */
 #define TASK2_PRIO      3                   /* 任务优先级 */
 #define TASK2_STK_SIZE  128                 /* 任务堆栈大小 */
-TaskHandle_t            Task2Task_Handler;  /* 任务句柄 */
-void task2(void *pvParameters);             /* 任务函数 */
+TaskHandle_t            middleTask_Handler;  /* 任务句柄 */
+void middletask(void *pvParameters);             /* 任务函数 */
 
 /* TASK3 任务 配置
  * 包括: 任务句柄 任务优先级 堆栈大小 创建任务
  */
-// #define TASK3_PRIO      4                   /* 任务优先级 */
-// #define TASK3_STK_SIZE  128                 /* 任务堆栈大小 */
-//  TaskHandle_t            Task3Task_Handler;  /* 任务句柄 */
-//  void task3(void *pvParameters);             /* 任务函数 */
+#define TASK3_PRIO      4                  /* 任务优先级 */
+#define TASK3_STK_SIZE  128                 /* 任务堆栈大小 */
+TaskHandle_t            highTask_Handler;  /* 任务句柄 */
+void hightask(void *pvParameters);             /* 任务函数 */
+
  QueueHandle_t   key_queue;      /* 队列句柄 */
  QueueHandle_t   big_data;
  char buff[100]={"大数组drthdydutduryfuyt"};
 /******************************************************************************************************/
     
-
  QueueHandle_t count_semphore_handle;      /* 信号量句柄 */
 void freertos_demo(void)
-{
-    count_semphore_handle=xSemaphoreCreateCounting(100,0);//创建一个计数信号量，最大计数值为100，初始计数值为0
+{   
+
+    count_semphore_handle=xSemaphoreCreateBinary();//创建一个计数信号量，最大计数值为100，初始计数值为0
     if(count_semphore_handle!=NULL){
         printf("success!\r\n");
     }
     else{
         printf("fail!\r\n");
     }
+    xSemaphoreGive(count_semphore_handle); //释放信号量，使其可用  
     // key_queue=xQueueCreate(2, sizeof(uint8_t));
     // if(key_queue!=NULL){
     //     printf("key_queue success！\r\n");
@@ -106,25 +108,25 @@ void start_task(void *pvParameters)
 {
     taskENTER_CRITICAL();           /* 进入临界区 */
     /* 创建任务1 */
-    xTaskCreate((TaskFunction_t )task1,
-                (const char*    )"task1",
+    xTaskCreate((TaskFunction_t )lowtask,
+                (const char*    )"lowtask",
                 (uint16_t       )TASK1_STK_SIZE,
                 (void*          )NULL,
                 (UBaseType_t    )TASK1_PRIO,
-                (TaskHandle_t*  )&Task1Task_Handler);
+                (TaskHandle_t*  )&lowTask_Handler);
     /* 创建任务2 */
-    xTaskCreate((TaskFunction_t )task2,
-                (const char*    )"task2",
+    xTaskCreate((TaskFunction_t )middletask,
+                (const char*    )"middletask",
                 (uint16_t       )TASK2_STK_SIZE,
                 (void*          )NULL,
                 (UBaseType_t    )TASK2_PRIO,
-                (TaskHandle_t*  )&Task2Task_Handler);
-    // xTaskCreate((TaskFunction_t )task3,
-    //             (const char*    )"task3",
-    //             (uint16_t       )TASK3_STK_SIZE,
-    //             (void*          )NULL,
-    //             (UBaseType_t    )TASK3_PRIO,
-    //             (TaskHandle_t*  )&Task3Task_Handler);
+                (TaskHandle_t*  )&middleTask_Handler);
+    xTaskCreate((TaskFunction_t )hightask,
+                (const char*    )"hightask",
+                (uint16_t       )TASK3_STK_SIZE,
+                (void*          )NULL,
+                (UBaseType_t    )TASK3_PRIO,
+                (TaskHandle_t*  )&highTask_Handler);
 
     taskEXIT_CRITICAL();            /* 退出临界区 */
     vTaskDelete(NULL);              /* 删除自身，避免任务函数返回 */
@@ -132,43 +134,20 @@ void start_task(void *pvParameters)
 
 /**释放信号量*/
  
-void task1(void *pvParameters)
+void lowtask(void *pvParameters)
 {
     (void)pvParameters;
-    uint8_t key_num=0;
     
-    // vListInitialise(&TestList);                 
-    // vListInitialiseItem(&ListItem1);            
-    // vListInitialiseItem(&ListItem2);            
-    // vListInitialiseItem(&ListItem3);
-   
+
     while(1)
     {
-        key_num=key_scan(0);
-        if(key_num==KEY0_PRES){
-            if(count_semphore_handle!=NULL){
-                xSemaphoreGive(count_semphore_handle);//释放信号量
-                
-
-            }
-        }
-    // printf("/**************ַ**************/\r\n");
-    // printf("\t\t\t\r\n");
-    // printf("TestList\t\t0x%p\t\r\n", &TestList);
-    // printf("TestList->pxIndex\t0x%p\t\r\n", TestList.pxIndex);
-    // printf("TestList->xListEnd\t0x%p\t\r\n", (&TestList.xListEnd));
-    // printf("ListItem1\t\t0x%p\t\r\n", &ListItem1);
-    // printf("ListItem2\t\t0x%p\t\r\n", &ListItem2);
-    // printf("ListItem3\t\t0x%p\t\r\n", &ListItem3);
-    // printf("/*****************************************************/\r\n");
-    // printf("KEY0!\r\n\r\n\r\n");
-    // taskENTER_CRITICAL(); /* 进入临界区 */
-    // printf("Task1 is running! %d\r\n", task1_num++);
-    // taskEXIT_CRITICAL();
-    
-
-
-    vTaskDelay(10);
+        
+    printf("low task get the semaphore\r\n");
+    xSemaphoreTake(count_semphore_handle, portMAX_DELAY); //等待信号量可用，阻塞时间为无限
+    printf("low task is running\r\n");
+    delay_ms(3000);
+    xSemaphoreGive(count_semphore_handle); //释放信号量，使其可用
+    vTaskDelay(1000);
 
 
        
@@ -178,31 +157,32 @@ void task1(void *pvParameters)
 
 /**获取信号量*/
  
-void task2(void *pvParameters)
+void middletask(void *pvParameters)
 {
     
-    BaseType_t err;
     while(1)
     {
-        xSemaphoreTake(count_semphore_handle, portMAX_DELAY);//等待信号量，直到获取到为止
-        if(err==pdTRUE){
-            printf("the value is%d!\r\n",(int)uxSemaphoreGetCount(count_semphore_handle));
-        }
+        printf("middle task is running\r\n");
         vTaskDelay(1000);
-   
-
-
+        
     }
 }
-//void task3(void *pvParameters)
-// {
+void hightask(void *pvParameters)
+{
     
     
-//     (void)pvParameters;
+    (void)pvParameters;
 
-//     while(1)
-//     {
-        
+    while(1)
+    {
+         printf("high task get the semaphore\r\n");
+    xSemaphoreTake(count_semphore_handle, portMAX_DELAY); //等待信号量可用，阻塞时间为无限
+    printf("high task is running\r\n");
+    delay_ms(1000);
+    printf("high task release the semaphore\r\n");
+    xSemaphoreGive(count_semphore_handle); //释放信号量，使其可用
+    vTaskDelay(1000);
+
     
-//     }
-// }
+    }
+}
